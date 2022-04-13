@@ -17,6 +17,13 @@ jobs:
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
+      - name: Get current time
+        uses: gerred/actions/current-time@master
+        id: current-time
+      - name: Use current time
+        env:
+          TIME: "${{ steps.current-time.outputs.time }}"
+        run: echo $TIME
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v3
 
@@ -71,6 +78,8 @@ jobs:
           project_id: sturdy-cable-343109
           credentials: ${{ secrets.GCP_SA_KEY }}
 
+
+
       - name: was-deploy-restart
         run: kubectl rollout restart deployment/was
 
@@ -79,6 +88,6 @@ jobs:
         with:
           credentials: ${{ secrets.GCP_CS_KEY }}
           path: ./build/libs/my-spring-board-0.0.1-SNAPSHOT.war
-          destination: aiden103
+          destination: aiden103/${{ steps.current-time.outputs.time }}/
 
 
