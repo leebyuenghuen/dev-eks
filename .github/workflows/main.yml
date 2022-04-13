@@ -13,6 +13,13 @@ jobs:
     runs-on: ubuntu-latest
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
+      - name: Get current time
+        uses: gerred/actions/current-time@master
+        id: current-time
+      - name: Use current time
+        env:
+          TIME: "${{ steps.current-time.outputs.time }}"
+        run: echo $TIME
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v3
       # Runs a single command using the runners shell
@@ -58,19 +65,15 @@ jobs:
       - name: was-deploy-restart
         run: kubectl rollout restart deployment/was
         
-      - name: Get current time
-        uses: gerred/actions/current-time@master
-        id: current-time
-      - name: Use current time
-        env:
-          TIME: "${{ steps.current-time.outputs.time }}"
-        # run: echo $TIME
+      - name: change war.file name
+        run: mv ./build/libs/*.war ./build/libs/$TIME.war
         
       - name: Cloud Storage Uploader
         uses: google-github-actions/upload-cloud-storage@v0.9.0
         with:
           credentials: ${{ secrets.GCP_CS_KEY }}
           path: ./build/libs/my-spring-board-0.0.1-SNAPSHOT.war
-          destination: aiden103/${{ steps.current-time.outputs.time }}/
+          destination: aiden103
+          glob: '*.war'
 
 
