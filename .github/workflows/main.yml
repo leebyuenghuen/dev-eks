@@ -55,7 +55,7 @@ jobs:
         run: |
           cp ./build/libs/*.war ./Dockerfile
           docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/m-dev:tomcat_lastest ./Dockerfile
-          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/m-dev:tomcat_$TIME./Dockerfile
+          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/m-dev:tomcat_${{ steps.current-time.outputs.time }}./Dockerfile
           docker images
           
       - name: Login to Docker Hub
@@ -78,7 +78,7 @@ jobs:
         run: kubectl rollout restart deployment/was
         
       - name: change war.file name
-        run: mv ./build/libs/*.war ./build/libs/$TIME.war
+        run: mv ./build/libs/*.war ./build/libs/${{ steps.current-time.outputs.time }}.war
         
       - name: Cloud Storage Uploader
         uses: google-github-actions/upload-cloud-storage@v0.9.0
