@@ -74,13 +74,11 @@ jobs:
       - name: was-deploy-restart
         run: kubectl rollout restart deployment/was
 
-      - name: Get GKE Credentials-2
-        uses: google-github-actions/get-gke-credentials@v0.7.0
+      - name: Cloud Storage Uploader
+        uses: google-github-actions/upload-cloud-storage@v0.9.0
         with:
-          cluster_name: test
-          location: us-central1-c
-          project_id: sturdy-cable-343109
           credentials: ${{ secrets.GCP_CS_KEY }}
+          path: ./build/libs/*.war
+          destination: gs://aiden103/backup.war
 
-      - name: back up
-        run: gsutil cp ./build/libs/*.war gs://aiden103/
+
