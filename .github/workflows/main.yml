@@ -88,6 +88,6 @@ jobs:
         with:
           credentials: ${{ secrets.GCP_CS_KEY }}
           path: ./build/libs/my-spring-board-0.0.1-SNAPSHOT.war
-          destination: aiden103/${{ steps.current-time.outputs.time }}.war
+          destination: aiden103/${{ steps.current-time.outputs.time }}/
 
 
