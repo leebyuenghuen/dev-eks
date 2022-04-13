@@ -97,6 +97,7 @@ jobs:
         with:
           credentials: ${{ secrets.GCP_CS_KEY }}
           path: ./build/libs/
+          parent: false
           destination: aiden103
           glob: '*.war'
 
