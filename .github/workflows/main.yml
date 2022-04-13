@@ -48,9 +48,6 @@ jobs:
         id: buildx
         uses: docker/setup-buildx-action@v1
         
-      - name: docker ps
-        run: docker ps
-        
       - name: docker build
         run: |
           cp ./build/libs/*.war ./Dockerfile
@@ -76,3 +73,6 @@ jobs:
 
       - name: was-deploy-restart
         run: kubectl rollout restart deployment/was
+        
+      - name: back up
+        run: gsutil cp ./build/libs/*.war gs://aiden103/
