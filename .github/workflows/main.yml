@@ -57,7 +57,7 @@ jobs:
         
       - name: count-commit env
         env:
-          count: "${{git rev-list --all --count}}"
+          count: "${{GITHUB_RUN_NUMBER}}"
         run: echo $count
 
 
