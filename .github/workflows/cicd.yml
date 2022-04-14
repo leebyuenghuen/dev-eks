@@ -38,43 +38,36 @@ jobs:
         id: buildx
         uses: docker/setup-buildx-action@v1
 
-#       - name: docker build
-#         run: |
-#           cp ./build/libs/*.war ./Dockerfile
-#           docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/m-dev:tomcat_lastest ./Dockerfile
-#           docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/m-dev:tomcat_$GITHUB_RUN_NUMBER ./Dockerfile
-#           docker images
+      - name: docker build
+        run: |
+          cp ./build/libs/*.war ./Dockerfile
+          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/m-dev:tomcat_lastest ./Dockerfile
+          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/m-dev:tomcat_$GITHUB_RUN_NUMBER ./Dockerfile
+          docker images
           
-#       - name: Login to Docker Hub
-#         uses: docker/login-action@v1
-#         with:
-#           username: ${{ secrets.DOCKERHUB_USERNAME }}
-#           password: ${{ secrets.DOCKERHUB_TOKEN }}
-#       - name: docker push
-#         run: |
-#           docker push ${{ secrets.DOCKERHUB_USERNAME }}/m-dev:tomcat_lastest
-#           docker push ${{ secrets.DOCKERHUB_USERNAME }}/m-dev:tomcat_$GITHUB_RUN_NUMBER
+      - name: Login to Docker Hub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          
+      - name: docker push
+        run: |
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/m-dev:tomcat_lastest
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/m-dev:tomcat_$GITHUB_RUN_NUMBER
         
-      - name: Configure AWS credentials nono
+      - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: eu-central-1
-          role-to-assume: arn:aws:iam::940168446867:role/eksctl-aiden103-cluster-ServiceRole-8NQWHJWI2U5R
-
-#       - name: Configure AWS Credentials
-#         uses: aws-actions/configure-aws-credentials@v1
-#         with:
-#           role-to-assume: arn:aws:iam::940168446867:role/eksctl-aiden103-cluster-ServiceRole-8NQWHJWI2U5R
-#           aws-region: eu-central-1
-
+          aws-region: ${{ secrets.AWS_REGION }}
           
-#       - name: was-deploy-restart
-#         run: kubectl rollout restart deployment/was
+      - name: was-deploy-restart
+        run: kubectl rollout restart deployment/was
         
-#       - name: change war.file name
-#         run: mv ./build/libs/*.war ./build/libs/${{ steps.current-time.outputs.time }}.war
+      - name: change war.file name
+        run: mv ./build/libs/*.war ./build/libs/${{ steps.current-time.outputs.time }}.war
         
 #       - name: Cloud Storage Uploader
 #         uses: google-github-actions/upload-cloud-storage@v0.9.0
