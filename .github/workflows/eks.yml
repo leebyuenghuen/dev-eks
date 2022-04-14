@@ -8,20 +8,15 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Get current time
-        uses: gerred/actions/current-time@master
-        id: current-time
-      - name: Use current time
-        env:
-          TIME: "${{ steps.current-time.outputs.time }}"
-        run: echo $TIME
+#       - name: Get current time
+#         uses: gerred/actions/current-time@master
+#         id: current-time
+#       - name: Use current time
+#         env:
+#           TIME: "${{ steps.current-time.outputs.time }}"
+#         run: echo $TIME
         
       - uses: actions/checkout@v3
-      - name: ls
-        run: ls -al
-        
-      - name: echo
-        run: echo "This is Checkout"
         
       - name: install jdk
         uses: actions/setup-java@v3
