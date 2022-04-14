@@ -8,6 +8,8 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v3
+      
       - name: Get current time
         uses: gerred/actions/current-time@master
         id: current-time
@@ -15,6 +17,9 @@ jobs:
         env:
           TIME: "${{ steps.current-time.outputs.time }}"
         run: echo $TIME
+        
+      - name: Set env
+        run: echo "DATE=$(date +%y-%m-%d-%H)" >> $GITHUB_ENV
         
       - uses: actions/checkout@v3
         
@@ -70,18 +75,18 @@ jobs:
           KUBE_CONFIG_DATA: ${{ secrets.KUBE_CONFIG_DATA }}
         with:
           args: rollout restart deployment/was
-
-#       - name: was-deploy-restart
-#         run: kubectl rollout restart deployment/was
         
       - name: change war.file name
-        run: mv ./build/libs/*.war ./build/libs/${{ steps.current-time.outputs.time }}.war
+        run: mv ./build/libs/*.war ./build/libs/${{ env.DATE }}.war
         
-#       - name: Cloud Storage Uploader
-#         uses: google-github-actions/upload-cloud-storage@v0.9.0
-#         with:
-#           credentials: ${{ secrets.GCP_CS_KEY }}
-#           path: ./build/libs/
-#           parent: false
-#           destination: aiden103
-#           glob: '*.war'	
+#       - name: filename change
+#         run: mv ./build/libs/*.war ./build/libs/${{ env.DATE }}.war
+
+      - name: Copy a folder to s3
+        uses: prewk/s3-cp-action@v2
+        with:
+          aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          source: ./build/libs
+          dest: s3://${{ secrets.AWS_S3_BUCKET }}
+          flags: --recursive
