@@ -1,85 +1,76 @@
+# This is a basic workflow to help you get started with Actions
 name: CICD
-
+# Controls when the workflow will run
 on:
+  # Triggers the workflow on push or pull request events but only for the main branch
   push:
     branches: [ main ]
-
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
+  # This workflow contains a single job called "build"
   build:
+    # The type of runner that the job will run on
     runs-on: ubuntu-latest
+    # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-#       - name: Get current time
-#         uses: gerred/actions/current-time@master
-#         id: current-time
-#       - name: Use current time
-#         env:
-#           TIME: "${{ steps.current-time.outputs.time }}"
-#         run: echo $TIME
-        
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v3
-        
       - name: install jdk
         uses: actions/setup-java@v3
         with:
           distribution: 'temurin'
           java-version: '11'
           cache: 'gradle'
-          
       - name: chmod gradle
         run: chmod +x ./gradlew
-        
       - name: build
         run: ./gradlew build --no-daemon
-        
       - name: check build
         run: ls ./build/libs
-        
+      # docker setup
       - name: Set up Docker Buildx
         id: buildx
         uses: docker/setup-buildx-action@v1
-
-#       - name: docker build
+      - name: docker ps
+        run: docker ps
+#       - name: copy war file
 #         run: |
 #           cp ./build/libs/*.war ./Dockerfile
-#           docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/m-dev:tomcat_lastest ./Dockerfile
-#           docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/m-dev:tomcat_$GITHUB_RUN_NUMBER ./Dockerfile
+#           docker build \
+#           -t ${{ secrets.DOCKERHUB_USERNAME }}/m-dev:tomcat-latest \
+#           -t ${{ secrets.DOCKERHUB_USERNAME }}/tomcat-backup:tomcat-$(date +%y-%m-%d-%H-%M) ./Dockerfile
 #           docker images
-          
-#       - name: Login to Docker Hub
-#         uses: docker/login-action@v1
-#         with:
-#           username: ${{ secrets.DOCKERHUB_USERNAME }}
-#           password: ${{ secrets.DOCKERHUB_TOKEN }}
-#       - name: docker push
+      - name: Login to Docker Hub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+#       - name: Docker Push
 #         run: |
-#           docker push ${{ secrets.DOCKERHUB_USERNAME }}/m-dev:tomcat_lastest
-#           docker push ${{ secrets.DOCKERHUB_USERNAME }}/m-dev:tomcat_$GITHUB_RUN_NUMBER
-        
-#       - name: Configure AWS credentials nono
-#         uses: aws-actions/configure-aws-credentials@v1
+#           docker push ${{ secrets.DOCKERHUB_USERNAME }}/m-dev --all-tags
+#           docker push ${{ secrets.DOCKERHUB_USERNAME }}/tomcat-backup --all-tags
+#       - name: Get GKE Credentials
+#         uses: google-github-actions/get-gke-credentials@v0.7.0
 #         with:
-#           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-#           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-#           aws-region: ${{ env.AWS_REGION }}
-
-      - name: Configure AWS Credentials
+#           cluster_name: gymin
+#           location: us-central1-c
+#           project_id: annular-magnet-343008
+#           credentials: ${{ secrets.GKE_SERVICE_KEY }}
+      - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
-          role-to-assume: arn:aws:iam::940168446867:role/eksctl-aiden103-cluster-ServiceRole-8NQWHJWI2U5R
-          aws-region: eu-central-1
-
-          
-#       - name: was-deploy-restart
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+#       - name: Was-delpoy restart
 #         run: kubectl rollout restart deployment/was
-        
-#       - name: change war.file name
-#         run: mv ./build/libs/*.war ./build/libs/${{ steps.current-time.outputs.time }}.war
-        
+#       - name: filename change
+#         run: mv ./build/libs/*.war ./build/libs/$(date +%y-%m-%d-%H-%M).war
 #       - name: Cloud Storage Uploader
 #         uses: google-github-actions/upload-cloud-storage@v0.9.0
 #         with:
-#           credentials: ${{ secrets.GCP_CS_KEY }}
+#           credentials: ${{ secrets.GKE_STORAGE_KEY }}
 #           path: ./build/libs/
 #           parent: false
-#           destination: aiden103
+#           destination: war-backup
 #           glob: '*.war'
