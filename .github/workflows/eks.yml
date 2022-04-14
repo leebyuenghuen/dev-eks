@@ -1,0 +1,98 @@
+# This is a basic workflow to help you get started with Actions
+name: test2
+# Controls when the workflow will run
+on:
+  # Triggers the workflow on push or pull request events but only for the main branch
+  push:
+    branches: [ main ]
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "build"
+  build:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      - name: Get current time
+        uses: gerred/actions/current-time@master
+        id: current-time
+      - name: Use current time
+        env:
+          TIME: "${{ steps.current-time.outputs.time }}"
+        run: echo $TIME
+        
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v3
+      # Runs a single command using the runners shell
+      - name: ls
+        run: ls -al
+        
+      # Runs a set of commands using the runners shell
+      - name: echo
+        run: echo "This is Checkout"
+        
+      - name: install jdk
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '11'
+          cache: 'gradle'
+          
+      - name: chmod gradle
+        run: chmod +x ./gradlew
+        
+      - name: build
+        run: ./gradlew build --no-daemon
+        
+      - name: check build
+        run: ls ./build/libs
+        
+      - name: Set up Docker Buildx
+        id: buildx
+        uses: docker/setup-buildx-action@v1
+
+#       - name: docker build
+#         run: |
+#           cp ./build/libs/*.war ./Dockerfile
+#           docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/m-dev:tomcat_lastest ./Dockerfile
+#           docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/m-dev:tomcat_$GITHUB_RUN_NUMBER ./Dockerfile
+#           docker images
+          
+#       - name: Login to Docker Hub
+#         uses: docker/login-action@v1
+#         with:
+#           username: ${{ secrets.DOCKERHUB_USERNAME }}
+#           password: ${{ secrets.DOCKERHUB_TOKEN }}
+#       - name: docker push
+#         run: |
+#           docker push ${{ secrets.DOCKERHUB_USERNAME }}/m-dev:tomcat_lastest
+#           docker push ${{ secrets.DOCKERHUB_USERNAME }}/m-dev:tomcat_$GITHUB_RUN_NUMBER
+        
+#       - name: Configure AWS credentials nono
+#         uses: aws-actions/configure-aws-credentials@v1
+#         with:
+#           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+#           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+#           aws-region: ${{ env.AWS_REGION }}
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: arn:aws:iam::940168446867:role/eksctl-aiden103-cluster-ServiceRole-8NQWHJWI2U5R
+          aws-region: eu-central-1
+
+          
+#       - name: was-deploy-restart
+#         run: kubectl rollout restart deployment/was
+        
+#       - name: change war.file name
+#         run: mv ./build/libs/*.war ./build/libs/${{ steps.current-time.outputs.time }}.war
+        
+#       - name: Cloud Storage Uploader
+#         uses: google-github-actions/upload-cloud-storage@v0.9.0
+#         with:
+#           credentials: ${{ secrets.GCP_CS_KEY }}
+#           path: ./build/libs/
+#           parent: false
+#           destination: aiden103
+#           glob: '*.war'
